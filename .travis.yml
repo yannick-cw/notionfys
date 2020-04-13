@@ -1,36 +1,73 @@
+language: scala
+
+scala:
+  - 2.13.1
+
+jdk:
+  - openjdk11
+
 jobs:
   include:
     - os: linux
-      env: JAVA_HOME="$HOME/.sdkman/candidates/java/current"
+      env: GRAAL_DOCKER_VERSION=20.0.0
     - os: osx
-      env: JAVA_HOME="$HOME/.sdkman/candidates/java/current"
     - os: windows
       language: shell
-      env: JAVA_HOME="$HOME/.sdkman/candidates/java/current"
+      env: NATIVE_IMAGE_PATH="C:/Program Files/GraalVM/graalvm-ce-java11-20.0.0/bin/native-image.cmd"
 
-branches:
-  only:
-    - master
-    # Ruby regex to match tags. Required, or travis won't trigger deploys when
-    # a new tag is pushed. Version tags should be of the form: v0.1.0
-    - /^v\d+\.\d+\.\d+.*$/
+services:
+  - docker
+
+addons:
+  homebrew:
+    update: true
+    taps: graalvm/tap
+    casks:
+      - graalvm-ce-java11
 
 before_install:
-  - if [ $TRAVIS_OS_NAME = windows ]; then choco install zip unzip ; fi
-  - if [ $TRAVIS_OS_NAME = windows ]; then choco install visualstudio2017-workload-vctools ; fi
-  - curl -sL https://get.sdkman.io | bash
-  - mkdir -p "$HOME/.sdkman/etc/"
-  - echo sdkman_auto_answer=true > "$HOME/.sdkman/etc/config"
-  - echo sdkman_auto_selfupdate=true >> "$HOME/.sdkman/etc/config"
-  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+  - |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        choco install graalvm sbt
+        eval $(powershell -NonInteractive -Command 'write("export PATH=`"" + ([Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [Environment]::GetEnvironmentVariable("PATH","User")).replace("\","/").replace("C:","/c").replace(";",":") + ":`$PATH`"")')
+        ;;
+    esac
 
 install:
-  - sdk install java 20.0.0.r11-grl
-  - if [ $TRAVIS_OS_NAME != windows ]; then gu install native-image ; fi
-  - if [ $TRAVIS_OS_NAME = windows ]; then gu.cmd install native-image ; fi
-  - if [ $TRAVIS_OS_NAME != windows ]; then native-image --version ; fi
-  - if [ $TRAVIS_OS_NAME = windows ]; then native-image.cmd --version ; fi
-  - sdk install sbt
+  - |-
+    case $TRAVIS_OS_NAME in
+      osx)
+        export PATH=/Library/Java/JavaVirtualMachines/graalvm-ce-java11-20.0.0/Contents/Home/bin:"$PATH"
+        gu install native-image
+        ;;
+      windows)
+        gu.cmd install native-image
+        ;;
+    esac
 
 script:
-  - ./ci/script.sh
+  - |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        sbt test
+        ./scripts/windows.bat
+        ;;
+      *)
+        sbt test 
+        sbt "graalvm-native-image:packageBin"
+        ;;
+    esac
+
+before_deploy:
+  - ./scripts/release.sh
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: pWzL0PBhY8UiuEMA3/oh7QkZVUT2OMY61CmzfT3r/2BU3mBuiHubB2BAmPlpY+xIVcNMKu1SHxRbtHoLdejWStUtY5+23UplheTE7BUFw61xlK9aZMliAukJeVPNJEmx4lI150pH53UJ3wNCPbkHcJIVNzKdL4g2twXXXutfStRgNuaOHWxNAZOrTb+EovyhFSHuluIu0hA7cwXVPbJANkaEVVxvRRNo/FOVP7wkhQ2+BPYQcYdUx4y/qUHyQF+jml3z0RX54bNMoj022EYDY2AbSSWOocDPK+7R80LQ8LG2y51RiDdtP/DEprgieKvI6w2GH7GRrb0Li5fszndMBNzNWc0tGGXGJcmDo/Y9GfSSG1urcWPuZtO9xpYGFeIhiB1CvYvG3gE4zM4WO5Ex4TmgbZOObtNF3CVf4a340R+pWDnVBfYRA7rFoH8082w1x6hqb/jXcxCvLTOMiMoNh3elMZQ5DlHNnUCcDxW8SUp+P1g5vH966mey1U9Ok9E83va+P4u/L4p/M05cTggkERmPmboQyAJGxlr9Fdjtg7fxogjxGe1aGDP3XKRoz2dlfGRSy6kM0QLnqs1GlM2mUlA6gfAqPxQHS36d8rMxTfrIhXdTikX0rlNlLMil07Od9VcNMBw5vLBv+fVyP50pf9xC2Pxr4Rhtl7z+oJLDzZY=
+  file: release/*
+  file_glob: true
+  on:
+    tags: true
