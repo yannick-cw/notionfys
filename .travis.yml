@@ -1,25 +1,36 @@
-language: scala
-sudo: true
-scala:
-  - 2.13.1
-jdk:
-  - openjdk11
-
-services:
-  - docker
-
-addons:
-  homebrew:
-    casks:
-      - graalvm/tap/graalvm-ce-java11
-
-install:
-  - if [ $TRAVIS_OS_NAME = osx ]; then gu install native-image ; fi
-
-script: sbt test && sbt "graalvm-native-image:packageBin"
-
 jobs:
   include:
     - os: linux
-      env: GRAAL_DOCKER_VERSION=20.0.0
+      env: JAVA_HOME="$HOME/.sdkman/candidates/java/current"
     - os: osx
+      env: JAVA_HOME="$HOME/.sdkman/candidates/java/current"
+    - os: windows
+      language: shell
+      env: JAVA_HOME="$HOME/.sdkman/candidates/java/current"
+
+branches:
+  only:
+    - master
+    # Ruby regex to match tags. Required, or travis won't trigger deploys when
+    # a new tag is pushed. Version tags should be of the form: v0.1.0
+    - /^v\d+\.\d+\.\d+.*$/
+
+before_install:
+  - if [ $TRAVIS_OS_NAME = windows ]; then choco install zip unzip ; fi
+  - if [ $TRAVIS_OS_NAME = windows ]; then choco install visualstudio2017-workload-vctools ; fi
+  - curl -sL https://get.sdkman.io | bash
+  - mkdir -p "$HOME/.sdkman/etc/"
+  - echo sdkman_auto_answer=true > "$HOME/.sdkman/etc/config"
+  - echo sdkman_auto_selfupdate=true >> "$HOME/.sdkman/etc/config"
+  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+install:
+  - sdk install java 20.0.0.r11-grl
+  - if [ $TRAVIS_OS_NAME != windows ]; then gu install native-image ; fi
+  - if [ $TRAVIS_OS_NAME = windows ]; then gu.cmd install native-image ; fi
+  - if [ $TRAVIS_OS_NAME != windows ]; then native-image --version ; fi
+  - if [ $TRAVIS_OS_NAME = windows ]; then native-image.cmd --version ; fi
+  - sdk install sbt
+
+script:
+  - ./ci/script.sh

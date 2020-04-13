@@ -6,17 +6,7 @@ organization in ThisBuild := "notionfys"
 
 scalaVersion in ThisBuild := "2.13.1"
 
-enablePlugins(GraalVMNativeImagePlugin)
-
 mappings in (Compile, packageDoc) := Seq()
-
-graalVMNativeImageOptions ++= Seq(
-  "--no-fallback",
-  "--allow-incomplete-classpath",
-  "--report-unsupported-elements-at-runtime",
-  "--initialize-at-build-time"
-)
-
 
 lazy val commonSettings = Seq(
   organizationName := "notionfys",
@@ -31,8 +21,7 @@ lazy val commonSettings = Seq(
     Libraries.scalaCheck % Test,
     compilerPlugin(Libraries.kindProjector),
     compilerPlugin(Libraries.betterMonadicFor)
-  ),
-  graalVMNativeImageGraalVersion := sys.env.get("GRAAL_DOCKER_VERSION"), //e.g. 20.0.0
+  )
 )
 
 lazy val root =
