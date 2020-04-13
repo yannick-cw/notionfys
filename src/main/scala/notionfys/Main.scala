@@ -101,7 +101,7 @@ object Main
   implicit val H: Highlights[AppM] = Highlights
 
   override def main: Opts[IO[ExitCode]] =
-    Cli.parseArgs.map(updateNotion[AppM].run(_).as(ExitCode.Success))
+    Cli.parseArgs.map(updateNotion[AppM].run(_).as(println("Welcome")).as(ExitCode.Success))
 
   def updateNotion[F[_]: Monad](
       implicit FS: FS[F],
