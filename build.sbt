@@ -14,8 +14,7 @@ graalVMNativeImageOptions ++= Seq(
   "--no-fallback",
   "--allow-incomplete-classpath",
   "--report-unsupported-elements-at-runtime",
-  "--initialize-at-build-time",
-  "--static"
+  "--initialize-at-build-time"
 )
 
 
@@ -33,7 +32,7 @@ lazy val commonSettings = Seq(
     compilerPlugin(Libraries.kindProjector),
     compilerPlugin(Libraries.betterMonadicFor)
   ),
-  graalVMNativeImageGraalVersion := Some("20.0.0"),
+  graalVMNativeImageGraalVersion := sys.env.get("GRAAL_DOCKER_VERSION"), //e.g. 20.0.0
 )
 
 lazy val root =

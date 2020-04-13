@@ -1,0 +1,25 @@
+language: scala
+sudo: true
+scala:
+  - 2.13.1
+jdk:
+  - openjdk11
+
+services:
+  - docker
+
+addons:
+  homebrew:
+    casks:
+      - graalvm/tap/graalvm-ce-java11
+
+install:
+  - if [ $TRAVIS_OS_NAME = osx ]; then gu install native-image ; fi
+
+script: sbt test && sbt "graalvm-native-image:packageBin"
+
+jobs:
+  include:
+    - os: linux
+      env: GRAAL_DOCKER_VERSION=20.0.0
+    - os: osx
