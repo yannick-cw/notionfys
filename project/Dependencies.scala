@@ -20,6 +20,8 @@ object Dependencies {
     lazy val catsEffect = "org.typelevel" %% "cats-effect"   % Versions.catsEffect
     lazy val catsMtl    = "org.typelevel" %% "cats-mtl-core" % "0.7.1"
 
+    lazy val atto = "org.tpolecat" %% "atto-core"    % "0.7.0"
+
     lazy val osLib = "com.lihaoyi" %% "os-lib" % "0.6.3"
 
     lazy val decline = "com.monovore" %% "decline-effect" % "1.2.0"

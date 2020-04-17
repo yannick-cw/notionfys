@@ -29,6 +29,7 @@ lazy val commonSettings = Seq(
     Libraries.catsEffect,
     Libraries.catsMtl,
     Libraries.osLib,
+    Libraries.atto,
     Libraries.decline,
     Libraries.scalaTest  % Test,
     Libraries.scalaCheck % Test,
