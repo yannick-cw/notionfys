@@ -7,7 +7,7 @@ import com.monovore.decline._
 import com.monovore.decline.effect._
 import App._
 
-case class Highlight(title: String, content: String)
+case class Highlight(title: String, content: String, tags: List[String])
 
 object Main
     extends CommandIOApp(

@@ -18,9 +18,17 @@ class HighlightsSpec extends FlatSpec with Matchers {
   }
 
   val expectedHighlights = List(
-    Highlight(title = "Tools of Titans (Timothy Ferriss)", content = "brainpicking"),
-    Highlight(title = "Der Rithmatist: Roman (German Edition) (Sanderson, Brandon)", content = ""),
-    Highlight(title = "Thinking with Types (Sandy Maguire)", content = "Monads are fun")
+    Highlight(title = "Tools of Titans (Timothy Ferriss)", content = "brainpicking", List.empty),
+    Highlight(
+      title = "Der Rithmatist: Roman (German Edition) (Sanderson, Brandon)",
+      content = "What",
+      List("tag1", "tag2", "tag3")
+    ),
+    Highlight(
+      title = "Thinking with Types (Sandy Maguire)",
+      content = "Monads are fun",
+      tags = List("fp", "is", "good")
+    )
   )
 
   val issue3Highlights =
@@ -28,11 +36,13 @@ class HighlightsSpec extends FlatSpec with Matchers {
       Highlight(
         title = "Indistractable (Nir Eyal;)",
         content =
-          "The Fogg Behavior Model states that for a behavior (B) to occur, three things must be present at the same time: motivation (M), ability (A), and a trigger (T). More succinctly, B = MAT."
+          "The Fogg Behavior Model states that for a behavior (B) to occur, three things must be present at the same time: motivation (M), ability (A), and a trigger (T). More succinctly, B = MAT.",
+        List.empty
       ),
       Highlight(
         title = "Indistractable (Nir Eyal;)",
-        content = "Is this trigger serving me, or am I serving it?"
+        content = "Is this trigger serving me, or am I serving it?",
+        List.empty
       )
     )
 }
