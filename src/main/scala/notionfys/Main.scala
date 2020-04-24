@@ -24,4 +24,3 @@ object Main
   override def main: Opts[IO[ExitCode]] =
     Cli.parseArgs.map(Program.updateNotion[AppM].run(_).as(println("Welcome")).as(ExitCode.Success))
 }
-

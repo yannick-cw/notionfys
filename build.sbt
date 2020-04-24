@@ -10,12 +10,14 @@ enablePlugins(GraalVMNativeImagePlugin)
 
 mappings in (Compile, packageDoc) := Seq()
 
+val maybeGraalDockerVersion = sys.env.get("GRAAL_DOCKER_VERSION") //e.g. 20.0.0
+
 graalVMNativeImageOptions ++= Seq(
   "--no-fallback",
   "--allow-incomplete-classpath",
   "--report-unsupported-elements-at-runtime",
   "--initialize-at-build-time"
-)
+) ++ maybeGraalDockerVersion.map(_ => "--static")
 
 val nativeImagePath = sys.env.get("NATIVE_IMAGE_PATH")
   .map(path => Seq(graalVMNativeImageCommand := path))
@@ -36,7 +38,7 @@ lazy val commonSettings = Seq(
     compilerPlugin(Libraries.kindProjector),
     compilerPlugin(Libraries.betterMonadicFor)
   ),
-  graalVMNativeImageGraalVersion := sys.env.get("GRAAL_DOCKER_VERSION"), //e.g. 20.0.0
+  graalVMNativeImageGraalVersion := maybeGraalDockerVersion,
 ) ++ nativeImagePath
 
 lazy val root =

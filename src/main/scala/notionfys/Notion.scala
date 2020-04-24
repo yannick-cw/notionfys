@@ -10,4 +10,3 @@ object Notion extends Notion[AppM] {
   def addSubPage(h: Highlight): AppM[Unit] = AppM.pure(())
   def getSubPages: AppM[List[Highlight]]   = AppM.pure(List.empty)
 }
-

@@ -4,7 +4,7 @@ import cats.data.ValidatedNel
 import cats.data.NonEmptyList
 import cats.data.Validated
 import scala.util.Try
-import java.{ util => ju }
+import java.{util => ju}
 import com.monovore.decline._
 import cats.implicits._
 
@@ -41,7 +41,10 @@ object Cli {
           help = "Path to your kindle, e.g. on Mac /Volumes/Kindle"
         )
         .mapValidated(
-          p => Validated.fromTry(Try(os.Path(p))).bimap(_ => NonEmptyList.one(s"$p is not an absolute path"), identity)
+          p =>
+            Validated
+              .fromTry(Try(os.Path(p)))
+              .bimap(_ => NonEmptyList.one(s"$p is not an absolute path"), identity)
         ),
       Opts.flag("verbose", help = "turn on verbose logging").orFalse
     ).mapN(Args)
