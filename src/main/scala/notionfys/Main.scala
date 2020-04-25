@@ -22,11 +22,22 @@ object Main
   implicit val H: Highlights[AppM] = Highlights[AppM]
   implicit val C: Console[AppM]    = Console
 
-  private def errorMsg(err: String) =
-    s"Unfortunately syncing failed, you can run with --verbose to see more details about what is going on. Please report the output to https://github.com/yannick-cw/notionfys, so I can fix it. Here is the raw error:\n$err"
+  private def errorMsg(err: Throwable, args: Args) =
+    s"Unfortunately syncing failed, you can run with --verbose to see more details about what is going on. Please report the output to https://github.com/yannick-cw/notionfys, so I can fix it. Here is the raw error:\n${if (args.verbose)
+      err.getLocalizedMessage ++ "\n" ++ err.getStackTrace.mkString("\n")
+    else err.getMessage}"
 
   override def main: Opts[IO[ExitCode]] =
     Cli.parseArgs
-      .map(Program.updateNotion[AppM].run(_).as(println("Welcome")).as(ExitCode.Success))
-      .map(_.onError { case NonFatal(err) => IO(println(errorMsg(err.toString))) })
+      .map(
+        args =>
+          Program
+            .updateNotion[AppM]
+            .run(args)
+            .as(println("Welcome"))
+            .as(ExitCode.Success)
+            .recoverWith {
+              case NonFatal(err) => IO(println(errorMsg(err, args))).as(ExitCode.Error)
+            }
+      )
 }
