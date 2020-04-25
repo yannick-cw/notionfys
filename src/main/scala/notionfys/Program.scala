@@ -22,10 +22,11 @@ object Program {
       _                 <- Console.log("Fetching highlights from Notion...")
       currentHighlights <- Notion.getSubPages
       _                 <- Console.log("Fetched current highlghts from Notion")
+      _                 <- Console.log(s"\nFound Highlights:\n${currentHighlights.map(_.title).mkString("\n")}\n")
       newHighlights = kindleHighlights.filterNot(
         h => currentHighlights.exists(cH => cH.title == h.title && cH.content == h.content)
       )
-      _ <- Console.log(s"Syncing new highlights: ${newHighlights.mkString("\n")}")
+      _ <- Console.log(s"\nSyncing new highlights:\n${newHighlights.map(_.title).mkString("\n")}\n")
       _ <- Console.log("....")
       _ <- newHighlights.traverse(Notion.addSubPage)
       _ <- Console.log("Done syncing new highlights to Notion")
