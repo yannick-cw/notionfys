@@ -17,7 +17,9 @@ object Highlights {
 
   def apply[F[_]: Applicative] = new Highlights[F] {
     def parseKindleHighlights(f: String): F[List[Highlight]] =
-      Applicative[F].pure(pp.parseOnly(f.filterNot(_ == '\r')).either.getOrElse(List.empty))
+      Applicative[F].pure(
+        pp.parseOnly(f.filterNot(_ == '\r')).either.getOrElse(List.empty).filter(_.content.nonEmpty)
+      )
 
     val whitespace = char(' ')
     val sepP       = string("==========")
